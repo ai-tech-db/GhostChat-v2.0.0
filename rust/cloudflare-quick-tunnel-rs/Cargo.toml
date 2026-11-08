@@ -1,8 +1,8 @@
 # ── Top-level production crate ────────────────────────────────────────────────
 
 [package]
-name        = "dl-cloudflare-quick-tunnel"
-version     = "0.3.1"
+name        = "dl-cloudflare-quick-tunnel-v2"
+version     = "0.4.0"
 edition     = "2021"
 license     = "MIT OR Apache-2.0"
 description = "Pure-Rust client for Cloudflare quick tunnels (https://*.trycloudflare.com) — no cloudflared subprocess. Speaks QUIC + capnp-RPC to the argotunnel edge directly. HTTP/1.1 + WebSocket Upgrade, HA pool, TCP keep-alive."
@@ -34,6 +34,8 @@ include = [
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+rustls-platform-verifier = "0.7"
+jni = "0.22"
 # Async + diagnostics
 tokio              = { version = "1", features = ["macros", "rt-multi-thread", "io-util", "net", "time", "sync"] }
 tracing            = "0.1"

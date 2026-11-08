@@ -56,3 +56,26 @@ pub mod supervisor;
 
 pub use error::TunnelError;
 pub use manager::{QuickTunnelHandle, QuickTunnelManager, TunnelMetrics};
+
+#[cfg(target_os = "android")]
+#[no_mangle]
+pub extern "system" fn Java_com_aitechdb_ghostchat_MainActivity_initRustlsPlatformVerifier(
+    mut env: jni::EnvUnowned,
+    _class: jni::objects::JClass,
+    context: jni::objects::JObject,
+) {
+    env.with_env(|env| {
+        rustls_platform_verifier::android::init_with_env(env, context)
+    }).resolve::<jni::errors::ThrowRuntimeExAndDefault>();
+}
+
+#[cfg(target_os = "android")]
+#[no_mangle]
+pub extern "system" fn rustls_platform_verifier_init(
+    mut env: jni::EnvUnowned,
+    context: jni::objects::JObject,
+) {
+    env.with_env(|env| {
+        rustls_platform_verifier::android::init_with_env(env, context)
+    }).resolve::<jni::errors::ThrowRuntimeExAndDefault>();
+}
