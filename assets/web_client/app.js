@@ -297,14 +297,21 @@
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-  const addMessage = ({ from, text, ts, self }) => {
+  const addMessage = ({ from, text, ts, self, image }) => {
     const div = document.createElement('div');
     div.className = 'msg ' + (self ? 'msg-self' : 'msg-other');
     let html = '';
     if (!self && from) html += `<div class="msg-author">${escapeHtml(from)}</div>`;
-    const isEmojiOnly = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}\s]+$/u.test(text) && text.trim().length <= 8;
-    const textClass = isEmojiOnly ? 'msg-emoji-big' : '';
-    html += `<div class="${textClass}">${escapeHtml(text)}</div>`;
+    
+    if (image) {
+      // Se c'è un'immagine, aggiungila al messaggio
+      html += `<div class="msg-image">${image.outerHTML}</div>`;
+    } else {
+      const isEmojiOnly = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}\s]+$/u.test(text) && text.trim().length <= 8;
+      const textClass = isEmojiOnly ? 'msg-emoji-big' : '';
+      html += `<div class="${textClass}">${escapeHtml(text)}</div>`;
+    }
+    
     if (ts) {
       html += `<div style="font-size:9px;opacity:0.5;margin-top:4px;text-align:right">${tsFormat(ts)}</div>`;
     }
@@ -517,6 +524,19 @@
 
   const handleMessage = async (msg) => {
     switch (msg.type) {
+      case 'image': {
+        const mime = msg.mime || 'image/jpeg';
+        const img = document.createElement('img');
+        img.src = `data:${mime};base64,` + msg.data;
+        img.style.maxWidth = '200px';
+        img.style.maxHeight = '200px';
+        img.style.borderRadius = '8px';
+        img.style.marginTop = '4px';
+        addMessage({ from: msg.from, text: '', image: img, ts: Date.now(), self: false });
+        break;
+      }
+
+
       case 'welcome': {
         state.myNickname = msg.nickname;
         state.sessionId = msg.sessionId;
@@ -588,6 +608,7 @@
         }
         break;
       }
+
 
       case 'message': {
         await processIncomingMessage(msg);
@@ -756,11 +777,12 @@
     }
   };
 
-  const send = (obj) => {
+  window.send = (obj) => {
     if (state.ws && state.ws.readyState === WebSocket.OPEN) {
       state.ws.send(JSON.stringify(obj));
     }
   };
+  const send = window.send;
 
   // ── UI wiring ──────────────────────────────────────────────────────────
 
@@ -880,3 +902,93 @@
   applyTranslations();
 
 })();
+
+// ── Gestione allegati immagini ────────────────────────────────────────
+const inputImage = document.getElementById('input-image');
+const btnAttach = document.getElementById('btn-attach');
+
+if (btnAttach) {
+  btnAttach.addEventListener('click', () => {
+    inputImage.click();
+  });
+}
+
+if (inputImage) {
+  inputImage.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      // 1. Blocca formati non supportati
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Formato immagine non supportato. Usa JPEG, PNG o WebP.');
+        inputImage.value = '';
+        return;
+      }
+
+      // 2. Blocca SVG (header check)
+      const probeBuffer = await file.slice(0, 100).arrayBuffer();
+      const header = new TextDecoder().decode(probeBuffer).toLowerCase();
+      if (header.includes('<svg') || header.includes('<?xml')) {
+        alert('Formato immagine non supportato (SVG bloccato).');
+        inputImage.value = '';
+        return;
+      }
+
+      // 3. Ridimensiona e comprimi con canvas
+      const resizedBlob = await resizeImage(file, 1280, 0.82);
+
+      // 4. Converti in base64 con FileReader (gestisce qualsiasi dimensione)
+      const dataUrl = await blobToBase64(resizedBlob);
+      const base64Data = dataUrl.split(',')[1];
+
+      // 5. Invia
+      send({
+        type: 'image',
+        data: base64Data,
+        filename: file.name,
+        mime: 'image/jpeg',
+      });
+
+      inputImage.value = '';
+    } catch (err) {
+      console.error('Errore invio immagine:', err);
+      alert('Errore durante l\'invio dell\'immagine: ' + (err?.message || err));
+      inputImage.value = '';
+    }
+  });
+}
+
+// Ridimensiona un'immagine a max lato lungo = maxSize, qualità JPEG = quality
+async function resizeImage(file, maxSize, quality) {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  bitmap.close?.();
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('toBlob ha restituito null'))),
+      'image/jpeg',
+      quality
+    );
+  });
+}
+
+// Converte un Blob in base64 (con prefisso data URL)
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error('FileReader error'));
+    reader.readAsDataURL(blob);
+  });
+}

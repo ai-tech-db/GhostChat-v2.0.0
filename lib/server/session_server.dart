@@ -159,7 +159,7 @@ class SessionServer {
       final res = await inner(req);
       return res.change(headers: {
         'Content-Security-Policy':
-            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
             "connect-src 'self' wss:; img-src 'self' data:; frame-ancestors 'none'; "
             "base-uri 'none'; form-action 'none'",
         'X-Frame-Options': 'DENY',
@@ -221,8 +221,24 @@ class SessionServer {
     if (path == 'strings_web.js') {
       return _serveAsset('strings_web.js', 'application/javascript; charset=utf-8');
     }
+    if (path == '/icon.png') {
+      return _serveBinaryAsset('icon.png', 'image/png');
+    }
 
     return shelf.Response.notFound('not found');
+  }
+
+  Future<shelf.Response> _serveBinaryAsset(String name, String contentType) async {
+    try {
+      final data = await _bundle.load('assets/web_client/$name');
+      return shelf.Response.ok(
+        data,
+        headers: {'content-type': contentType},
+      );
+    } catch (e) {
+      print('Errore caricamento asset binario: $e');
+      return shelf.Response.notFound('asset non trovato: $name');
+    }
   }
 
   Future<shelf.Response> _serveAsset(String name, String contentType) async {
@@ -507,6 +523,18 @@ class SessionServer {
             break;
           }
         }
+        break;
+
+      case 'image':
+        final imgData = msg['data'] as String?;
+        if (imgData == null || imgData.isEmpty) return;
+        _broadcast(session, {
+          'type': 'image',
+          'from': participant.nickname,
+          'data': imgData,
+          'filename': msg['filename'] ?? 'image',
+          'mime': msg['mime'] ?? 'image/jpeg',
+        }, exclude: ws);
         break;
 
       case 'message':
