@@ -30,9 +30,10 @@ The session is ephemeral: it lives as long as the app is running. No messages ar
 
 - **End-to-end encryption** (AES-GCM 256, PBKDF2 250k, ECDSA P-256)
 - **Forward secrecy per message** (HKDF-derived key per message)
+- **No sniffing / No server-side decryption** — messages are encrypted with AES-GCM 256 client-side; the server (and any network eavesdropper) sees only ciphertext.
 - **Zero persistence** — server is a blind relay, no logs, no database
 - **Zero accounts** — no email, no phone number, no registration
-- **Zero metadata** — images are stripped of EXIF (GPS, device) before sending
+- **Privacy-first images** — resized to max 1280px and stripped of all EXIF data (GPS, device) before being encoded in Base64 and end-to-end encrypted for transport.
 - **Anonymous nicknames** — generated client-side
 - **Multi-language UI** — Italiano, English, Español
 - **Embedded Cloudflare Tunnel** — no port forwarding, no public IP
