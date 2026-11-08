@@ -29,11 +29,14 @@ The session is ephemeral: it lives as long as the app is running. No messages ar
 ## Features
 
 - **End-to-end encryption** (AES-GCM 256, PBKDF2 250k, ECDSA P-256)
+- **No one can read your secret messages** — strong client-side encryption keeps your conversations private.
 - **Forward secrecy per message** (HKDF-derived key per message)
 - **No sniffing / No server-side decryption** — messages are encrypted with AES-GCM 256 client-side; the server (and any network eavesdropper) sees only ciphertext.
 - **Zero persistence** — server is a blind relay, no logs, no database
 - **Zero accounts** — no email, no phone number, no registration
-- **Privacy-first images** — resized to max 1280px and stripped of all EXIF data (GPS, device) before being encoded in Base64 and end-to-end encrypted for transport.
+- **Image sharing** — send PNG, JPEG, and WebP from your gallery.
+- **Camera capture** — take photos directly in-app.
+- **Privacy-first images** — all images are resized to max 1280px and stripped of all EXIF data (GPS, device) before being encoded in Base64 and end-to-end encrypted for transport.
 - **Anonymous nicknames** — generated client-side
 - **Multi-language UI** — Italiano, English, Español
 - **Embedded Cloudflare Tunnel** — no port forwarding, no public IP
