@@ -7,9 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'l10n/strings.dart';
+import 'splash_screen.dart';
 import 'server/session_server.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
+import 'package:mediaforge_flutter/mediaforge_flutter.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runZonedGuarded(
     () => runApp(const MyApp()),
     (error, stack) {
@@ -24,7 +30,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'GhostChat',
+        title: 'GhostChat v2.0.0',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
@@ -34,7 +40,7 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
         ),
-        home: const TunnelPage(),
+        home: SplashScreen(nextScreen: const TunnelPage()),
       );
 }
 
@@ -538,6 +544,53 @@ class _TunnelPageState extends State<TunnelPage> {
         ],
       ),
     );
+
+  // Funzione di sicurezza: blocca SVG
+  bool _isSafeImage(Uint8List bytes) {
+    try {
+      final header = utf8.decode(bytes.take(100).toList(), allowMalformed: true).toLowerCase();
+      if (header.contains('<svg') || header.contains('<?xml')) {
+        return false;
+      }
+    } catch (_) {}
+    return true;
+  }
+
+  // // Funzione per selezionare, pulire e inviare un'immagine
+  // Future<void> _pickAndSendImage() async {
+  // final picker = ImagePicker();
+  // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+  // if (pickedFile == null) return;
+
+  // final rawBytes = await pickedFile.readAsBytes();
+
+  // if (!_isSafeImage(rawBytes)) {
+  // if (mounted) {
+  // ScaffoldMessenger.of(context).showSnackBar(
+  // const SnackBar(content: Text('Formato immagine non supportato (SVG bloccato)')),
+  // );
+  // }
+  // return;
+  // }
+
+  // final cleanBytes = await MediaForge.stripMetadata(rawBytes);
+  // final isClean = await MediaForge.verifyClean(cleanBytes);
+  // if (!isClean) {
+  // if (mounted) {
+  // ScaffoldMessenger.of(context).showSnackBar(
+  // const SnackBar(content: Text('Errore nella pulizia dell\'immagine')),
+  // );
+  // }
+  // return;
+  // }
+
+  // // INVIO: adatta questa parte al tuo sistema di invio esistente
+  // // Esempio:
+  // // _channel.invokeMethod('sendImage', cleanBytes);
+  // debugPrint('Immagine pronta per l\'invio: ${cleanBytes.length} bytes');
+  // }
+
   }
 }
 
@@ -598,9 +651,13 @@ class _GhostLogo extends StatelessWidget {
         ],
       ),
       alignment: Alignment.center,
-      child: const Text(
-        '👻',
-        style: TextStyle(fontSize: 64, height: 1),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/branding/APP-Log.png',
+          width: 96,
+          height: 96,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

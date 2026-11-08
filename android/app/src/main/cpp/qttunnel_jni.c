@@ -3,6 +3,7 @@
 
 extern void* quick_tunnel_start(uint16_t port);
 extern const char* quick_tunnel_url(void* ctx);
+extern void rustls_platform_verifier_init(JNIEnv *env, jobject context);
 extern void quick_tunnel_stop(void* ctx);
 
 JNIEXPORT jlong JNICALL
@@ -26,4 +27,10 @@ Java_com_aitechdb_ghostchat_MainActivity_quick_1tunnel_1stop(
     JNIEnv* env, jobject thiz, jlong ctx) {
     if (ctx == 0) return;
     quick_tunnel_stop((void*)(uintptr_t)ctx);
+}
+
+JNIEXPORT void JNICALL
+Java_com_aitechdb_ghostchat_MainActivity_initRustlsPlatformVerifier(JNIEnv *env, jclass clazz, jobject context) {
+    // Chiama la funzione Rust corrispondente
+    rustls_platform_verifier_init(env, context);
 }

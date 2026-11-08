@@ -1,7 +1,7 @@
 name: ghostchat_qudslab
 description: "GhostChat - chat temporanea con tunnel Cloudflare embedded"
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+3
 
 environment:
   sdk: ^3.7.2
@@ -15,6 +15,9 @@ dependencies:
   shelf: ^1.4.1
   shelf_web_socket: ^3.0.0
   web_socket_channel: ^3.0.1
+  mediaforge_flutter: ^0.3.0
+  image_picker: ^1.1.2
+  video_player: ^2.8.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +28,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/web_client/
+    - assets/branding/Ghost-Chat.mp4
+    - assets/branding/APP-Log.png

@@ -9,6 +9,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    external fun initRustlsPlatformVerifier(context: android.content.Context)
 
     private val METHOD_CHANNEL = "com.aitechdb.ghostchat/native"
 
@@ -27,6 +28,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initRustlsPlatformVerifier(applicationContext)
 
         // Blocca screenshot e registrazione schermo.
         // Necessario perche' la schermata mostra passphrase e codici invito.

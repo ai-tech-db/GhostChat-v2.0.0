@@ -67,7 +67,7 @@ class GhostStrings {
 
   static const Map<String, GhostStrings> _all = {
     'it': GhostStrings(
-      appTitle: 'GhostChat',
+      appTitle: 'GhostChat v2.0.0',
       howItWorks: 'COME FUNZIONA',
       step1: '1. Premi "Avvia Quick Tunnel"',
       step2: '2. Attendi l\'URL pubblico (15-20 secondi)',
@@ -98,7 +98,7 @@ class GhostStrings {
       langSpanish: 'Español',
     ),
     'en': GhostStrings(
-      appTitle: 'GhostChat',
+      appTitle: 'GhostChat v2.0.0',
       howItWorks: 'HOW IT WORKS',
       step1: '1. Tap "Start Quick Tunnel"',
       step2: '2. Wait for the public URL (15-20 seconds)',
@@ -129,7 +129,7 @@ class GhostStrings {
       langSpanish: 'Español',
     ),
     'es': GhostStrings(
-      appTitle: 'GhostChat',
+      appTitle: 'GhostChat v2.0.0',
       howItWorks: 'CÓMO FUNCIONA',
       step1: '1. Pulsa "Iniciar Quick Tunnel"',
       step2: '2. Espera la URL pública (15-20 segundos)',
