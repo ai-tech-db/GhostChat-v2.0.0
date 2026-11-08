@@ -123,11 +123,13 @@ Browser A, Browser B, Browser C
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/ai-tech-db/ghostchat.git
-cd ghostchat
+git clone https://github.com/ai-tech-db/GhostChat-v2.0.0.git
+cd GhostChat-v2.0.0
 ```
 
 ### 2. Build the Rust tunnel
+
+The `v2.0.0` crate uses `rustls-platform-verifier`, which requires a specific Android AAR dependency.
 
 ```bash
 cd rust/cloudflare-quick-tunnel-rs
@@ -139,11 +141,14 @@ export CXX_aarch64_linux_android=$NDK_BIN/aarch64-linux-android26-clang++
 export AR_aarch64_linux_android=$NDK_BIN/llvm-ar
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$CC_aarch64_linux_android
 
+# Build the Rust library (this generates libdl_cloudflare_quick_tunnel_v2.so)
 cargo build --release --target aarch64-linux-android
 
+# Copy and rename it to the name expected by Android
 cp target/aarch64-linux-android/release/libdl_cloudflare_quick_tunnel_v2.so \
    ../../android/app/src/main/jniLibs/arm64-v8a/libqttunnel.so
 
+# Set the correct soname
 patchelf --set-soname libqttunnel.so \
    ../../android/app/src/main/jniLibs/arm64-v8a/libqttunnel.so
 ```
@@ -168,7 +173,9 @@ $CC -shared -fPIC \
 
 ### 4. Build the APK
 
-Debug build (for testing):
+**Important:** Gradle needs to find the `rustls-platform-verifier-android` AAR. Our `android/settings.gradle.kts` runs `cargo metadata` to locate it. Ensure `cargo` is in your `PATH`.
+
+Debug build:
 
 ```bash
 flutter pub get
@@ -186,9 +193,9 @@ keytool -genkey -v \
   -alias ghostchat
 ```
 
-2. Create android/key.properties:
+2. Create `android/key.properties`:
 
-```
+```properties
 storePassword=YOUR_PASSWORD
 keyPassword=YOUR_PASSWORD
 keyAlias=ghostchat
@@ -201,9 +208,17 @@ storeFile=ghostchat-release.jks
 flutter build apk --release
 ```
 
-Output: build/app/outputs/flutter-apk/app-release.apk
+Output: `build/app/outputs/flutter-apk/app-release.apk`
 
----
+### Docker alternative
+
+A `Dockerfile` is provided to reproduce the environment. It pre-installs Rust, `cargo-ndk`, and the Android NDK.
+
+```bash
+docker build -t ghostchat-v2-builder .
+docker run --rm -v "$PWD":/workspace -w /workspace ghostchat-v2-builder \
+  bash -c "flutter pub get && flutter build apk --debug"
+```
 
 ## Security
 
