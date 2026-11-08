@@ -1,6 +1,6 @@
-# GhostChat
+# GhostChat v2.0.0
 
-[![License: GPL-3.0](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Version](https://img.shields.io/badge/version-2.0.0-brightgreen.svg)](#) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Flutter](https://img.shields.io/badge/Flutter-3.35.7-02569B?logo=flutter)](https://flutter.dev)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com)
 [![Android](https://img.shields.io/badge/Android-13%20(API%2033)-3DDC84?logo=android)](https://www.android.com)
@@ -17,6 +17,13 @@ GhostChat turns an Android device into a self-contained chat server:
 
 The session is ephemeral: it lives as long as the app is running. No messages are stored anywhere. No metadata survives the session.
 
+
+## What's new in v2.0.0
+
+- **New Rust crate (v0.4.0)**: Replaced `webpki-roots` with `rustls-platform-verifier`. TLS certificate validation now follows the Android OS, eliminating the need to manually update bundled Mozilla CA certificates.
+- **Image Privacy**: Photos taken from the camera or selected from the gallery are resized (max 1280px, JPEG 0.82) and **all EXIF metadata (GPS, device, date) are stripped** via an in-browser canvas before sending.
+- **Camera Fix**: Fixed an issue on Samsung devices where the camera intent returned a deleted temporary file. The app now correctly resizes and sends camera photos.
+
 ---
 
 ## Features
@@ -25,6 +32,7 @@ The session is ephemeral: it lives as long as the app is running. No messages ar
 - **Forward secrecy per message** (HKDF-derived key per message)
 - **Zero persistence** — server is a blind relay, no logs, no database
 - **Zero accounts** — no email, no phone number, no registration
+- **Zero metadata** — images are stripped of EXIF (GPS, device) before sending
 - **Anonymous nicknames** — generated client-side
 - **Multi-language UI** — Italiano, English, Español
 - **Embedded Cloudflare Tunnel** — no port forwarding, no public IP
@@ -41,7 +49,7 @@ GhostChat solves this by using a **pure-Rust QUIC client** ([`cloudflare-quick-t
 
 - **JNI bindings** to call it from Flutter
 - **Custom DoH resolver** (hickory) to bypass OEM DNS filtering
-- **`webpki-roots`** bundled for TLS validation without system CAs
+- **`rustls-platform-verifier`** for native OS certificate validation (no manual CA updates)
 
 Result: a **native Android app** that runs Cloudflare Quick Tunnel with **no root, no Termux, no VPS, no `cloudflared` subprocess**.
 
@@ -49,10 +57,9 @@ Result: a **native Android app** that runs Cloudflare Quick Tunnel with **no roo
 
 ## Demo
 
-![GhostChat demo](assets/demo.jpg)
+![GhostChat demo](assets/branding/APP-trimmed.png)
 
-👉 [Watch the full video on Facebook](https://www.facebook.com/reel/1515365443976250)
-👉 [Watch the reel on Facebook](https://www.facebook.com/share/v/1Cyj44iYMG/)
+🎬 [Watch the demo video](assets/branding/GhostChat-compressed.mp4)
 
 ---
 
@@ -133,7 +140,7 @@ export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$CC_aarch64_linux_android
 
 cargo build --release --target aarch64-linux-android
 
-cp target/aarch64-linux-android/release/libdl_cloudflare_quick_tunnel.so \
+cp target/aarch64-linux-android/release/libdl_cloudflare_quick_tunnel_v2.so \
    ../../android/app/src/main/jniLibs/arm64-v8a/libqttunnel.so
 
 patchelf --set-soname libqttunnel.so \

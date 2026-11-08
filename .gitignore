@@ -86,3 +86,7 @@ app.*.map.json
 *.swo
 tmp/
 temp/
+*.so
+
+# Native libs (compiled)
+*.so
