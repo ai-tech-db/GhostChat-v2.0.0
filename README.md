@@ -310,8 +310,8 @@ See CONTRIBUTING.md for guidelines.
 
 ## Contact
 
-- **Issues**: https://github.com/ai-tech-db/ghostchat/issues
-- **Discussions**: https://github.com/ai-tech-db/ghostchat/discussions
+- **Issues**: https://github.com/ai-tech-db/GhostChat-v2.0.0/issues
+- **Discussions**: https://github.com/ai-tech-db/GhostChat-v2.0.0/discussions
 
 ---
 
